@@ -1,0 +1,63 @@
+1. The Tech Stack Recommendation
+Since you aren't sure what to pick, I’ve selected the "Performance Stack" for you. It’s the fastest and most reliable for offline barcode scanning.
+
+Language: Kotlin (Official Android language).
+
+UI Framework: Jetpack Compose (For that modern, clean, pastel look).
+
+Database: Room / SQLite (Ultra-fast local storage; no internet needed).
+
+Scanner: Google ML Kit Barcode Scanning (The fastest library for instant camera scanning).
+
+Export Format: CSV (Comma Separated Values) — this opens perfectly in Excel and Google Sheets.
+
+2. The Project Blueprint (Copy & Paste this)
+Project Name: Offline Retail Billing Assistant
+
+Core Functionality:
+
+Inventory Mode: A screen to pre-load Article Codes and their corresponding Prices into the local database.
+
+Quick Scan Billing: * Use the camera to scan a barcode.
+
+If the code exists, auto-fill the Price.
+
+Default Quantity to 1.
+
+Allow manual override of both Price and Quantity via large numeric inputs.
+
+Bill Management: Support multiple items per bill. Show a live "Total Amount."
+
+Checkout Logic: * Optional fields for Customer Name and Mobile Number.
+
+Payment toggle: Cash (Default) vs UPI.
+
+"Cash Received" field that auto-calculates "Change to Give."
+
+Data Export: A "Export to Excel" button that generates a CSV file of all transaction history and saves it to the phone's "Documents" or "Downloads" folder.
+
+UI/UX Specs:
+
+Style: Minimalist, clean, modern.
+
+Colors: Neutral pastels (e.g., Soft Sage Green for 'Success/Add', Muted Blue for 'Buttons', Off-white background).
+
+Accessibility: Use Big Buttons (minimum 60dp height) for high-speed tapping. No tiny menus.
+
+3. How the AI should build it (Phases)
+To ensure the AI doesn't get confused, ask it to work in this order:
+
+Phase 1: Create the local database (Room) to store "Articles" (Code, Name, Price) and "Bills" (ID, Date, Items, Total).
+
+Phase 2: Build the Barcode Scanner screen using ML Kit. It should "beep" or vibrate when a code is found.
+
+Phase 3: Create the Billing UI where items are listed as they are scanned.
+
+Phase 4: Implement the CSV Export logic so you can get your Excel data.
+
+4. Future-Proofing (The "Later" stuff)
+Since you mentioned WhatsApp and Bill generation later, I have designed this blueprint to be "modular." * WhatsApp: In the future, the AI will simply use an "Android Intent" to send the bill text to the phone number you collected.
+
+PDF: We can add a "Print to PDF" library later without changing the core database.
+
+Wit & Wisdom: In a time-sensitive shop, the "Back" button is your enemy. Tell the AI: "Ensure the UI has a 'Clear All' or 'Next Customer' button that is physically far away from the 'Add Item' button to prevent accidental deletions."
