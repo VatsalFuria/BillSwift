@@ -10,7 +10,6 @@ import {
   ScrollView,
   Alert,
   Platform,
-  Vibration,
   KeyboardAvoidingView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

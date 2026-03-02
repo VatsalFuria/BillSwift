@@ -50,13 +50,13 @@ function BillCard({ bill, onDelete }: BillCardProps) {
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardLeft}>
-          <View style={styles.payBadge(bill.paymentMethod)}>
+          <View style={bill.paymentMethod === "cash" ? styles.payBadgeCash : styles.payBadgeUpi}>
             <Ionicons
               name={bill.paymentMethod === "cash" ? "cash-outline" : "phone-portrait-outline"}
               size={12}
               color={bill.paymentMethod === "cash" ? Colors.cashGreen : Colors.upiBlue}
             />
-            <Text style={styles.payBadgeText(bill.paymentMethod)}>
+            <Text style={bill.paymentMethod === "cash" ? styles.payBadgeTextCash : styles.payBadgeTextUpi}>
               {bill.paymentMethod.toUpperCase()}
             </Text>
           </View>
@@ -259,11 +259,6 @@ export default function HistoryScreen() {
   );
 }
 
-const payColors = {
-  cash: { bg: "#E8F5EE", text: Colors.cashGreen },
-  upi: { bg: "#E8F0FA", text: Colors.upiBlue },
-};
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   header: {
@@ -315,22 +310,38 @@ const styles = StyleSheet.create({
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   cardLeft: { gap: 4 },
-  payBadge: (method: "cash" | "upi") => ({
+  payBadgeCash: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 4,
-    backgroundColor: payColors[method].bg,
+    backgroundColor: "#E8F5EE",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
     alignSelf: "flex-start" as const,
-  }),
-  payBadgeText: (method: "cash" | "upi") => ({
+  },
+  payBadgeUpi: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: "#E8F0FA",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    alignSelf: "flex-start" as const,
+  },
+  payBadgeTextCash: {
     fontFamily: "Nunito_700Bold" as const,
     fontSize: 10,
-    color: payColors[method].text,
+    color: Colors.cashGreen,
     letterSpacing: 0.5,
-  }),
+  },
+  payBadgeTextUpi: {
+    fontFamily: "Nunito_700Bold" as const,
+    fontSize: 10,
+    color: Colors.upiBlue,
+    letterSpacing: 0.5,
+  },
   billDate: { fontFamily: "Nunito_700Bold", fontSize: 15, color: Colors.text },
   billTime: { fontFamily: "Nunito_400Regular", fontSize: 12, color: Colors.textSecondary },
   customerName: { fontFamily: "Nunito_600SemiBold", fontSize: 13, color: Colors.secondary },
