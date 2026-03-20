@@ -16,33 +16,55 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { useApp, Article } from "@/context/AppContext";
+import * as DocumentPicker from "expo-document-picker";
+import { File } from "expo-file-system";
 
 interface ArticleFormProps {
   visible: boolean;
   initial?: Article | null;
   onClose: () => void;
-  onSave: (data: { code: string; name: string; price: number }) => void;
+  onSave: (data: { code: string; name: string; price: number; serial: string }) => void;
 }
 
 function ArticleForm({ visible, initial, onClose, onSave }: ArticleFormProps) {
   const [code, setCode] = useState(initial?.code ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [price, setPrice] = useState(initial?.price?.toString() ?? "");
+  const [serial, setSerial] = useState(initial?.serial ?? "");
 
   React.useEffect(() => {
     if (visible) {
       setCode(initial?.code ?? "");
       setName(initial?.name ?? "");
       setPrice(initial?.price?.toString() ?? "");
+      setSerial(initial?.serial ?? "");
     }
   }, [visible, initial]);
 
   const handleSave = () => {
     const parsedPrice = parseFloat(price);
-    if (!code.trim()) { Alert.alert("Required", "Please enter an article code."); return; }
-    if (!name.trim()) { Alert.alert("Required", "Please enter an item name."); return; }
-    if (isNaN(parsedPrice) || parsedPrice <= 0) { Alert.alert("Invalid", "Please enter a valid price."); return; }
-    onSave({ code: code.trim(), name: name.trim(), price: parsedPrice });
+    if (!code.trim()) {
+      Alert.alert("Required", "Please enter an article code.");
+      return;
+    }
+    if (!name.trim()) {
+      Alert.alert("Required", "Please enter an item name.");
+      return;
+    }
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      Alert.alert("Invalid", "Please enter a valid price.");
+      return;
+    }
+    if (!serial.trim()) {
+      Alert.alert("Required", "Please enter a serial number.");
+      return;
+    }
+    onSave({
+      code: code.trim(),
+      name: name.trim(),
+      price: parsedPrice,
+      serial: serial.trim(),
+    });
   };
 
   return (
@@ -88,12 +110,30 @@ function ArticleForm({ visible, initial, onClose, onSave }: ArticleFormProps) {
                 selectTextOnFocus
               />
             </View>
+            <View style={styles.inputRow}>
+              <Ionicons name="key-outline" size={18} color={Colors.textSecondary} />
+              <TextInput
+                style={styles.input}
+                placeholder="Serial *"
+                placeholderTextColor={Colors.textSecondary}
+                value={serial}
+                onChangeText={setSerial}
+              />
+            </View>
           </View>
           <View style={styles.formActions}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={onClose}
+              activeOpacity={0.8}
+            >
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.saveBtn}
+              onPress={handleSave}
+              activeOpacity={0.8}
+            >
               <Ionicons name="checkmark" size={20} color={Colors.white} />
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
@@ -117,15 +157,30 @@ function ArticleCard({ article, onEdit, onDelete }: ArticleCardProps) {
         <View style={styles.codeTag}>
           <Text style={styles.codeText}>{article.code}</Text>
         </View>
-        <Text style={styles.cardName} numberOfLines={1}>{article.name}</Text>
+        <Text style={styles.cardName} numberOfLines={1}>
+          {article.name}
+        </Text>
+        {article.serial ? (
+          <Text style={styles.serialText} numberOfLines={1}>
+            SN: {article.serial}
+          </Text>
+        ) : null}
       </View>
       <View style={styles.cardRight}>
         <Text style={styles.cardPrice}>₹{article.price.toFixed(2)}</Text>
         <View style={styles.cardActions}>
-          <TouchableOpacity onPress={() => onEdit(article)} style={styles.iconBtn} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => onEdit(article)}
+            style={styles.iconBtn}
+            activeOpacity={0.7}
+          >
             <Ionicons name="pencil-outline" size={18} color={Colors.secondary} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onDelete(article)} style={styles.iconBtn} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => onDelete(article)}
+            style={styles.iconBtn}
+            activeOpacity={0.7}
+          >
             <Ionicons name="trash-outline" size={18} color={Colors.error} />
           </TouchableOpacity>
         </View>
@@ -145,11 +200,19 @@ export default function InventoryScreen() {
     const q = search.toLowerCase();
     if (!q) return articles;
     return articles.filter(
-      a => a.code.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+      (a) =>
+        a.code.toLowerCase().includes(q) ||
+        a.name.toLowerCase().includes(q) ||
+        a.serial?.toLowerCase().includes(q),
     );
   }, [articles, search]);
 
-  const handleSave = (data: { code: string; name: string; price: number }) => {
+  const handleSave = (data: {
+    code: string;
+    name: string;
+    price: number;
+    serial: string;
+  }) => {
     if (editingArticle) {
       updateArticle({ ...editingArticle, ...data });
     } else {
@@ -174,6 +237,102 @@ export default function InventoryScreen() {
     ]);
   };
 
+  const handleImportCSV = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "text/csv",
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) return;
+
+      const fileUri = result.assets[0].uri;
+
+      const file = new File(fileUri);
+      const content = await file.text();
+
+      processCSV(content);
+    } catch (e) {
+      Alert.alert("Import Failed", "Unable to read file.");
+    }
+  };
+
+  const processCSV = (content: string) => {
+    const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    if (lines.length < 2) {
+      Alert.alert("Invalid File", "CSV must contain header and at least one row.");
+      return;
+    }
+
+    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+
+    const required = ["code", "name", "price", "serial"];
+    const missing = required.filter((r) => !headers.includes(r));
+
+    if (missing.length > 0) {
+      Alert.alert("Invalid CSV", `Missing columns: ${missing.join(", ")}`);
+      return;
+    }
+
+    const indexMap: Record<string, number> = {};
+    headers.forEach((h, i) => {
+      indexMap[h] = i;
+    });
+
+    let added = 0;
+    let duplicate = 0;
+    const invalidRows: { code?: string; name?: string; serial?: string }[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map((c) => c.trim());
+
+      const code = cols[indexMap["code"]];
+      const name = cols[indexMap["name"]];
+      const priceStr = cols[indexMap["price"]];
+      const serial = cols[indexMap["serial"]];
+
+      const price = parseFloat(priceStr);
+
+      if (!code || !name || !serial || isNaN(price) || price <= 0) {
+        invalidRows.push({ code, name, serial });
+        continue;
+      }
+
+      const exists = articles.find((a) => a.code.toLowerCase() === code.toLowerCase());
+      if (exists) {
+        duplicate++;
+        continue;
+      }
+
+      addArticle({
+        code: code.trim(),
+        name: name.trim(),
+        price,
+        serial: serial.trim(),
+      });
+
+      added++;
+    }
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    let message = `Processed: ${lines.length - 1}\nAdded: ${added}\nDuplicate: ${duplicate}\nInvalid: ${invalidRows.length}`;
+
+    if (invalidRows.length > 0) {
+      const preview = invalidRows
+        .slice(0, 5)
+        .map(
+          (r) =>
+            `Code: ${r.code ?? "-"} | Name: ${r.name ?? "-"} | Serial: ${r.serial ?? "-"}`,
+        )
+        .join("\n");
+
+      message += `\n\nInvalid Rows (first 5):\n${preview}`;
+    }
+
+    Alert.alert("Import Summary", message);
+  };
+
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
   const bottomPad = insets.bottom + (Platform.OS === "web" ? 34 : 0);
 
@@ -182,15 +341,31 @@ export default function InventoryScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>Inventory</Text>
-          <Text style={styles.headerSub}>{articles.length} article{articles.length !== 1 ? "s" : ""}</Text>
+          <Text style={styles.headerSub}>
+            {articles.length} article{articles.length !== 1 ? "s" : ""}
+          </Text>
         </View>
-        <TouchableOpacity
-          style={styles.addBtn}
-          onPress={() => { setEditingArticle(null); setFormVisible(true); }}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity
+            style={[styles.addBtn, { backgroundColor: Colors.secondary }]}
+            onPress={handleImportCSV}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="cloud-upload-outline" size={20} color={Colors.white} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => {
+              setEditingArticle(null);
+              setFormVisible(true);
+            }}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.searchBar}>
@@ -227,7 +402,10 @@ export default function InventoryScreen() {
           renderItem={({ item }) => (
             <ArticleCard
               article={item}
-              onEdit={(a) => { setEditingArticle(a); setFormVisible(true); }}
+              onEdit={(a) => {
+                setEditingArticle(a);
+                setFormVisible(true);
+              }}
               onDelete={handleDelete}
             />
           )}
@@ -239,7 +417,10 @@ export default function InventoryScreen() {
       <ArticleForm
         visible={formVisible}
         initial={editingArticle}
-        onClose={() => { setFormVisible(false); setEditingArticle(null); }}
+        onClose={() => {
+          setFormVisible(false);
+          setEditingArticle(null);
+        }}
         onSave={handleSave}
       />
     </View>
@@ -259,7 +440,12 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   headerTitle: { fontFamily: "Nunito_800ExtraBold", fontSize: 24, color: Colors.text },
-  headerSub: { fontFamily: "Nunito_400Regular", fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
+  headerSub: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
   addBtn: {
     width: 44,
     height: 44,
@@ -309,8 +495,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  codeText: { fontFamily: "Nunito_700Bold", fontSize: 11, color: Colors.primary, letterSpacing: 0.5 },
+  codeText: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 11,
+    color: Colors.primary,
+    letterSpacing: 0.5,
+  },
   cardName: { fontFamily: "Nunito_600SemiBold", fontSize: 15, color: Colors.text },
+  serialText: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
   cardRight: { alignItems: "flex-end", gap: 8 },
   cardPrice: { fontFamily: "Nunito_800ExtraBold", fontSize: 18, color: Colors.text },
   cardActions: { flexDirection: "row", gap: 8 },
@@ -324,10 +521,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  emptyState: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, paddingBottom: 80 },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    paddingBottom: 80,
+  },
   emptyTitle: { fontFamily: "Nunito_700Bold", fontSize: 20, color: Colors.textSecondary },
-  emptyDesc: { fontFamily: "Nunito_400Regular", fontSize: 14, color: Colors.textSecondary, textAlign: "center" },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
+  emptyDesc: {
+    fontFamily: "Nunito_400Regular",
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
   formModal: {
     backgroundColor: Colors.white,
     borderTopLeftRadius: 24,
@@ -344,7 +556,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 4,
   },
-  formTitle: { fontFamily: "Nunito_800ExtraBold", fontSize: 22, color: Colors.text, textAlign: "center" },
+  formTitle: {
+    fontFamily: "Nunito_800ExtraBold",
+    fontSize: 22,
+    color: Colors.text,
+    textAlign: "center",
+  },
   inputGroup: { gap: 10 },
   inputRow: {
     flexDirection: "row",
@@ -377,7 +594,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  cancelText: { fontFamily: "Nunito_600SemiBold", fontSize: 15, color: Colors.textSecondary },
+  cancelText: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 15,
+    color: Colors.textSecondary,
+  },
   saveBtn: {
     flex: 2,
     height: 56,

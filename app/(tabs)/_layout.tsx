@@ -11,14 +11,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 function NativeTabLayout() {
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "barcode.viewfinder", selected: "barcode.viewfinder" }} />
-        <Label>Scan & Bill</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="inventory">
         <Icon sf={{ default: "archivebox", selected: "archivebox.fill" }} />
         <Label>Inventory</Label>
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="index">
+        <Icon sf={{ default: "barcode.viewfinder", selected: "barcode.viewfinder" }} />
+        <Label>Scan & Bill</Label>
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="history">
         <Icon sf={{ default: "clock", selected: "clock.fill" }} />
         <Label>History</Label>
@@ -59,15 +61,6 @@ function ClassicTabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: "Scan & Bill",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="barcode-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="inventory"
         options={{
           title: "Inventory",
@@ -76,6 +69,17 @@ function ClassicTabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Scan & Bill",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="barcode-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="history"
         options={{

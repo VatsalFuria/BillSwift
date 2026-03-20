@@ -1,34 +1,35 @@
 {
   "expo": {
     "name": "BillSwift",
-    "slug": "my-app",
+    "slug": "billswift",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "billswift",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#F7F9F8"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.myapp",
+      "bundleIdentifier": "com.billswift.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Scan barcodes to add items to your bill"
       }
     },
     "android": {
-      "package": "com.myapp",
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"],
-      "adaptiveIcon": {
-        "backgroundColor": "#F7F9F8",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      }
+      "package": "com.billswift.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -42,11 +43,21 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-camera"
+      "expo-camera",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": "https://replit.com/"
+      },
+      "eas": {
+        "projectId": "1bc18a08-2d80-430d-8e5a-ca1e6482ed5f"
+      }
+    },
+    "owner": "f.vatlord"
   }
 }
