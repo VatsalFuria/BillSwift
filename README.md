@@ -149,3 +149,18 @@ This project is open-source and available under the MIT License.
 ## 💡 Summary
 
 BillSwift is built to be a **fast, scalable, and practical solution** for managing billing and inventory with minimal friction, making it ideal for small businesses and personal use.
+
+
+## 📱 App Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/14b75ac5-a240-43ec-be72-842b8d62000c" width="240"/>
+  <img src="https://github.com/user-attachments/assets/f2c7e960-b7ee-4c23-b9df-a2c6f33f1844" width="240"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/745c5c0a-4304-45cf-9bd2-dcf0423111e7" width="240"/>
+  <img src="https://github.com/user-attachments/assets/1a31010e-32dc-4144-87cd-c595041085bc" width="240"/>
+</p>
+
+
