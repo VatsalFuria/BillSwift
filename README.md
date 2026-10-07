@@ -1,155 +1,152 @@
-## BillSwift — Smart Expense & Inventory Management System
+# BillSwift — Smart POS & Inventory Management System
+## 💡 Summary
 
-BillSwift is a modern, mobile-first application designed to simplify **billing, expense tracking, and inventory management**. It combines real-time data handling, barcode scanning, and efficient backend services to streamline small business and personal finance workflows.
-
----
-
-## 🚀 Features
-
-### 📦 Inventory Management
-
-* Add, update, and delete products
-* Track stock levels in real time
-* CSV import support for bulk inventory upload
-* Categorization and search functionality
-
-### 🧾 Billing System
-
-* Generate bills quickly
-* Automatic total calculation
-* Maintain transaction history
-* Optimized for fast checkout workflows
-
-### 📷 Barcode Scanner
-
-* Scan products using device camera
-* Instant lookup and billing integration
-* Flashlight support for low-light scanning
-
-### 📊 Expense Tracking
-
-* Record and manage expenses
-* Categorize spending
-* Analyze usage trends (extendable)
+BillSwift is a modern, mobile-first Point-of-Sale (POS) application engineered to streamline billing, inventory tracking, and expense management for small businesses. Built with an offline-first architecture, it leverages native device capabilities to deliver a high-speed, frictionless checkout experience.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Core Features
+
+### 🧾 Lightning-Fast Billing Workflow
+
+* **Real-Time Cart:** Scan barcodes to instantly add items to the cart with automatic total calculation.
+
+
+* **Payment Splitting:** Built-in toggles to track transactions via Cash or UPI.
+
+
+* **Change Calculation:** Automatically calculates change due for cash transactions to prevent cashier errors.
+
+
+* **Custom Notes:** Append specific cashier notes to individual transactions for auditing.
+
+
+
+### 📦 Robust Inventory Management
+
+* **Bulk Operations:** Import inventory lists directly via CSV parsing.
+
+
+* **Manual & Automated Entry:** Add items manually or update existing stock codes, serial numbers, and prices.
+
+
+* **Live Search:** Filter and locate products instantly by code or name.
+
+
+
+### 📷 Native Barcode Integration
+
+* **Device Camera Scanner:** Utilizes `expo-camera` to scan Code39 barcodes.
+
+
+* **Duplicate Prevention:** Built-in caching prevents accidental double-scanning within a 15-second window.
+
+
+* **Haptic Feedback:** Provides physical confirmation of successful scans or errors using `expo-haptics`.
+
+
+
+### 📊 Analytics & History
+
+* **Session Insights:** View total revenue, total bills, average bill value, and median bill value at a glance.
+
+
+* **Data Portability:** Export full transaction histories to CSV and share them natively via device sharing menus.
+
+
+* **Transaction Editing:** Modify cashier notes on past bills without deleting the transaction record.
+
+
+
+---
+
+## 🛠️ Technical Architecture
+
+BillSwift utilizes a modern JavaScript/TypeScript ecosystem, separating a fluid mobile frontend from a scalable Node.js backend environment.
 
 ### Frontend (Mobile)
 
-* React Native (Expo)
-* TypeScript
-* Camera & Barcode Scanner APIs
+* **Framework:** React Native with Expo.
 
-### Backend
 
-* FastAPI (Python)
-* RESTful API architecture
+* **Language:** TypeScript.
 
-### Database
 
-* SQL (relational database for structured data)
+* **Routing:** Expo Router (File-based routing).
 
-### Other Tools
 
-* CSV parsing for data import
-* Git & GitHub for version control
+* **State Management:** React Context API paired with `@react-native-async-storage/async-storage` for offline-first data persistence.
+
+
+* **Data Fetching:** `@tanstack/react-query`.
+
+
+* **UI/UX:** `react-native-reanimated` for 60fps animations, `expo-glass-effect` for native iOS blurring, and `react-native-keyboard-controller` for seamless form inputs.
+
+
+
+### Backend & Database
+
+* **Server:** Express.js (Node.js).
+
+
+* **Database ORM:** Drizzle ORM configured for PostgreSQL.
+
+
+* **Schema Validation:** Zod.
+
+
 
 ---
 
-## 📁 Project Structure
-
-```
-BillSwift/
-│── frontend/          # React Native (Expo) app
-│── backend/           # FastAPI server
-│── assets/            # Images, icons, static files
-│── data/              # Sample CSVs / test data
-│── README.md
-```
-
----
-
-## ⚙️ Setup Instructions
+## ⚙️ Setup & Installation
 
 ### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/BillSwift.git
 cd BillSwift
-```
-
----
-
-### 2. Frontend Setup
-
-```bash
-cd frontend
 npm install
-npx expo start
+
 ```
 
----
+### 2. Start the Backend Server
 
-### 3. Backend Setup
+The Express server handles API requests and database interactions.
 
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+npm run server:dev
+
 ```
 
----
+### 3. Start the Frontend Application
 
-## 📄 CSV Import Notes
+The Expo development server supports Hot Module Reloading (HMR). Open a new terminal tab and run:
 
-* Ensure CSV files:
+```bash
+npm run expo:dev
 
-  * Have proper headers (e.g., `name, price, quantity`)
-  * Are encoded in UTF-8
-  * Use `.csv` extension with correct MIME type
+```
 
----
-
-## 🔧 Key Challenges Solved
-
-* Handling inconsistent CSV file formats and metadata
-* Real-time syncing between scanner and billing module
-* Efficient state management in React Native
-* Backend API optimization for low latency
+*Note: Scan the generated QR code using the Expo Go app on your physical device, or press `i` to open in an iOS simulator or `a` for an Android emulator.*
 
 ---
 
-## 📈 Future Improvements
+## 📄 CSV Import Guidelines
 
-* Cloud deployment (AWS/GCP)
-* User authentication & multi-user support
-* Analytics dashboard
-* Offline-first capability
-* AI-based product recognition
+To bulk import inventory, ensure your CSV files meet the following criteria:
 
----
+* **Required Headers:** `code`, `name`, `price`, `serial`.
 
-## 🤝 Contributing
 
-1. Fork the repository
-2. Create a new branch (`feature/your-feature`)
-3. Commit your changes
-4. Push and create a Pull Request
+* **Data Types:** `price` must be a valid number greater than 0.
+
+
+* The app will automatically reject invalid rows and skip duplicate article codes during import.
+
+
 
 ---
-
-## 📜 License
-
-This project is open-source and available under the MIT License.
-
----
-
-## 💡 Summary
-
-BillSwift is built to be a **fast, scalable, and practical solution** for managing billing and inventory with minimal friction, making it ideal for small businesses and personal use.
-
 
 ## 📱 App Screenshots
 
